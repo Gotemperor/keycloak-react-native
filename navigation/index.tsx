@@ -18,6 +18,10 @@ import TabOneScreen from '../screens/TabOneScreen';
 import TabTwoScreen from '../screens/TabTwoScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
+import TabThreeScreen from "../screens/TabThreeScreen";
+import {FontAwesome5} from "@expo/vector-icons";
+import {createMaterialBottomTabNavigator} from "@react-navigation/material-bottom-tabs";
+import Login from "../screens/Login";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -34,7 +38,8 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
  * https://reactnavigation.org/docs/modal
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
+// const Stack = createMaterialBottomTabNavigator();
+const BottomTab = createMaterialBottomTabNavigator<RootTabParamList>();
 function RootNavigator() {
   return (
     <Stack.Navigator>
@@ -51,21 +56,29 @@ function RootNavigator() {
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
  * https://reactnavigation.org/docs/bottom-tab-navigator
  */
-const BottomTab = createBottomTabNavigator<RootTabParamList>();
+
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="Login"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
       }}>
+        <BottomTab.Screen
+            name="Login"
+            component={Login}
+            options={() => ({
+                title: 'Login',
+                tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+            })}
+        />
       <BottomTab.Screen
         name="TabOne"
         component={TabOneScreen}
-        options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
+        options={({ navigation }) => ({
           title: 'Tab One',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
@@ -89,9 +102,19 @@ function BottomTabNavigator() {
         component={TabTwoScreen}
         options={{
           title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome5 name={"acquisitions-incorporated"} />,
         }}
+        initialParams={{ItemName: 'Item from navigation', Itemid: 12}}
       />
+        <BottomTab.Screen
+            name="TabThree"
+            component={TabThreeScreen}
+            options={{
+                title: 'Tab Three',
+                tabBarIcon: ({ focused,size, color }) =>
+                    <FontAwesome5 name={"atlassian"}  color={focused ? 'red' : 'black'}/>,
+            }}
+        />
     </BottomTab.Navigator>
   );
 }
