@@ -5,13 +5,41 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
-import { ReactNativeKeycloakProvider } from '@react-keycloak/native';
+// import {
+//   IKeycloakConfiguration,
+//   KeycloakProvider,
+//   useKeycloak,
+// } from 'expo-keycloak';
 
+import { KeycloakProvider, useKeycloak } from "expo-keycloak-auth";
 
-import keycloak from './keycloak';
+// import keycloak from './keycloak';
 import Login from "./screens/Login";
+import AppConfig from './app.json';
+
+  // const keycloakConfiguration: IKeycloakConfiguration = {
+  //   url: 'https://idp.grasp.systems:8443/auth',
+  //   realm: 'local-test',
+  //   clientId: 'client2',
+  //   scheme: AppConfig.expo.scheme,
+  // }
+const keycloakConfiguration = {
+    url: 'https://idp.grasp.systems:8443/auth',
+    realm: 'local-test',
+    clientId: 'client2',
+    // scheme: AppConfig.expo.scheme,
+};
 
 export default function App() {
+    const {
+        ready, // If the discovery is already fetched
+        login, // The login function - opens the browser
+        isLoggedIn, // Helper boolean to use e.g. in your components down the tree
+        token, // Access token, if available
+        logout, // Logs the user out
+    } = useKeycloak();
+
+
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
 
@@ -19,24 +47,14 @@ export default function App() {
     return null;
   } else {
     return (
-        <ReactNativeKeycloakProvider
-            initOptions={{
-              redirectUri: 'myapp://TabOne',
-              // if you need to customize "react-native-inappbrowser-reborn" View you can use the following attribute
-                onLoad: "login-required",
-                'public-client': true,
-                // onLoad: 'check-sso',
-                // silentCheckSsoRedirectUri: 'https://www.npmjs.com/package/expo-keycloak',
-                // LoadingComponent: Login,
-                // isLoadingCheck: true
-            }}
-            authClient={keycloak}
-        >
+        <KeycloakProvider {...keycloakConfiguration}>
       <SafeAreaProvider>
         <Navigation colorScheme={colorScheme} />
+          {console.log('app token', token, isLoggedIn)}
+
         <StatusBar />
       </SafeAreaProvider>
-       </ReactNativeKeycloakProvider>
+        </KeycloakProvider>
     );
   }
 }

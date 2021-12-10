@@ -1,15 +1,24 @@
 import * as React from 'react';
-import {Button, Pressable, StyleSheet} from 'react-native';
+import {Button, Pressable, StyleSheet, ActivityIndicator} from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
 import {useEffect, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
- import { useKeycloak } from '@react-keycloak/native';
+import { KeycloakProvider, useKeycloak } from "expo-keycloak-auth";
 
 export default function TabTwoScreen({navigation, route}) {
   const {ItemName, ItemId} = route.params;
-     const [keycloak, initialized] = useKeycloak();
+    const {
+        ready, // If the discovery is already fetched
+        login, // The login function - opens the browser
+        isLoggedIn, // Helper boolean to use e.g. in your components down the tree
+        token, // Access token, if available
+        logout, // Logs the user out
+    } = useKeycloak();
+    if (!ready) return <ActivityIndicator />;
+    const keycloak = useKeycloak();
+
     const [email, setEmail] = useState('');
     useEffect(() => {
         getData();
@@ -32,21 +41,23 @@ export default function TabTwoScreen({navigation, route}) {
     <View style={styles.container}>
       <Text style={styles.title}>Tab Two</Text>
         <Text style={styles.title}> email {email}</Text>
-        <View>
-            <Text>
-                {console.log(keycloak)}
+        {!isLoggedIn &&
 
-                {`User is ${!keycloak.authenticated ? 'NOT ' : ''}authenticated`}
-                <Button onPress={() => keycloak?.login().then(() => {
-                console.log('login')
-                }).catch(err => console.log('err', err))
-                } title="Login" />
-            </Text>
+            <View style={{margin: 24}}>
+            <Button onPress={login} title={'Login'} />
+            </View>
 
-            {!!keycloak.authenticated && (
-                <Button onPress={() => keycloak.logout()} title="Logout" />
-            )}
-        </View>
+        }
+        {console.log('keycloak', keycloak)}
+        {console.log('token', token, isLoggedIn)}
+        {!!isLoggedIn &&
+        <View style={{ margin: 24 }}>
+            <Text style={{ fontSize: 17, marginBottom: 24 }}>Logged in!</Text>
+
+            {token &&
+            <Text>Token: {token}</Text> }
+            <Button onPress={logout} title={'Logout'} style={{ marginTop: 24 }} />
+        </View> }
 
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="/screens/TabTwoScreen.tsx" />
